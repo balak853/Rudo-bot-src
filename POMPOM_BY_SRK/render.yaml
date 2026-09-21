@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: pompom-by-srk
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: BOT_TOKEN
+        sync: false

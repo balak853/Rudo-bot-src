@@ -1,0 +1,17 @@
+{
+  "name": "pompom-by-srk",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Telegram subscription bot with manual payment verification",
+  "main": "src/srk.js",
+  "scripts": {
+    "start": "node src/srk.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4",
+    "telegraf": "^4.16.3"
+  }
+}
