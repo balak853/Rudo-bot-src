@@ -1976,7 +1976,15 @@ process.on("uncaughtException", (error) => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 const HEALTH_PORT = Number(process.env.PORT || process.env.HEALTH_PORT || 10000);
+const WEBHOOK_PATH = process.env.WEBHOOK_PATH || "/telegram/webhook";
+const PUBLIC_URL = (process.env.PUBLIC_URL || process.env.RENDER_EXTERNAL_URL || "").replace(/\/+$/, "");
+const webhookHandler = PUBLIC_URL ? bot.webhookCallback(WEBHOOK_PATH) : null;
+
 const healthServer = http.createServer((req, res) => {
+    if (webhookHandler && req.method === "POST" && req.url === WEBHOOK_PATH) {
+        return webhookHandler(req, res);
+    }
+
     if (req.url === "/health" || req.url === "/") {
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify({
@@ -2006,6 +2014,18 @@ let launchAttempts = 0;
 async function startBot() {
     try {
         launchAttempts++;
+
+        if (PUBLIC_URL) {
+            const webhookUrl = `${PUBLIC_URL}${WEBHOOK_PATH}`;
+            await bot.telegram.setWebhook(webhookUrl, {
+                drop_pending_updates: true
+            });
+            console.log(`✅ Bot is running in webhook mode: ${webhookUrl}`);
+            launchAttempts = 0;
+            return;
+        }
+
+        await bot.telegram.deleteWebhook({ drop_pending_updates: true });
         await bot.launch({
             dropPendingUpdates: true
         });
